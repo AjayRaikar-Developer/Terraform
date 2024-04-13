@@ -1,0 +1,311 @@
+trigger:
+  - main
+
+pool: Microsoft Agent Pool
+
+stages:
+- stage: 'Terraform_Planning'
+  jobs:
+  - job: 'Job1'
+    displayName: 'US West 2 Common'
+    steps:
+    - checkout: self
+      clean: true
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+      displayName: 'Use Terraform latest'
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'nonprod/westus2/common'
+        commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+        backendType: selfConfigured
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Validate'
+      inputs:
+        command: 'validate'
+        workingDirectory: 'nonprod/westus2/common'
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out="nonprod_uswest2_common.tfplan"'
+        workingDirectory: 'nonprod/westus2/common'
+        environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+
+  - job: 'Job2'
+    displayName: 'US West 2 Function Apps'
+    dependsOn: 'Job1'
+    steps:
+    - checkout: self
+      clean: true
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+      displayName: 'Use Terraform latest'
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'nonprod/westus2/functions'
+        commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+        backendType: selfConfigured
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Validate'
+      inputs:
+        command: 'validate'
+        workingDirectory: 'nonprod/westus2/functions'
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out="nonprod_uswest2_functions.tfplan"'
+        workingDirectory: 'nonprod/westus2/functions'
+        environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+
+  - job: 'Job3'
+    displayName: 'US West 2 App Service'
+    dependsOn: 'Job1'
+    steps:
+    - checkout: self
+      clean: true
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+      displayName: 'Use Terraform latest'
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'nonprod/westus2/appservice'
+        commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+        backendType: selfConfigured
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Validate'
+      inputs:
+        command: 'validate'
+        workingDirectory: 'nonprod/westus2/appservice'
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out="nonprod_uswest2_appservice.tfplan"'
+        workingDirectory: 'nonprod/westus2/appservice'
+        environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+
+  - job: 'Job4'
+    displayName: 'US EAST Common'
+    steps:
+    - checkout: self
+      clean: true
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+      displayName: 'Use Terraform latest'
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'nonprod/eastus/common'
+        commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+        backendType: selfConfigured
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Validate'
+      inputs:
+        command: 'validate'
+        workingDirectory: 'nonprod/eastus/common'
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out="nonprod_east_common.tfplan"'
+        workingDirectory: 'nonprod/eastus/common'
+        environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+
+  - job: 'Job5'
+    displayName: 'US EAST App Service'
+    dependsOn: 'Job4'
+    steps:
+    - checkout: self
+      clean: true
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+      displayName: 'Use Terraform latest'
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'nonprod/eastus/appservice'
+        commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+        backendType: selfConfigured
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Validate'
+      inputs:
+        command: 'validate'
+        workingDirectory: 'nonprod/eastus/appservice'
+        allowTelemetryCollection: false
+
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out="nonprod_east_appservice.tfplan"'
+        workingDirectory: 'nonprod/eastus/appservice'
+        environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+
+- stage: 'Terraform_Deployment'
+  dependsOn: 'Terraform_Planning'
+  lockBehavior: sequential
+  jobs:
+  - deployment: 'US_WEST_COMMON'
+    displayName: 'US West 2 Common'
+    environment: 'non-prod' # specify the environment here
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+              displayName: 'Use Terraform latest'
+
+
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform init'
+              inputs:
+                command: 'init'
+                workingDirectory: 'nonprod/westus2/common'
+                commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+                backendType: selfConfigured
+                allowTelemetryCollection: false
+                            
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform Apply'
+              inputs:
+                command: 'apply'
+                workingDirectory: 'nonprod/westus2/common'
+                environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+                commandOptions: '-auto-approve'
+
+  - deployment: 
+    displayName: 'US West 2 Function Apps'
+    dependsOn: 'US_WEST_COMMON'
+    environment: 'non-prod' # specify the environment here
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+              displayName: 'Use Terraform latest'
+ 
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform init'
+              inputs:
+                command: 'init'
+                workingDirectory: 'nonprod/westus2/functions'
+                commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+                backendType: selfConfigured
+                allowTelemetryCollection: false           
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform Apply'
+              inputs:
+                command: 'apply'
+                workingDirectory: 'nonprod/westus2/functions'
+                environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+                commandOptions: '-auto-approve'
+
+  - deployment: 
+    displayName: 'US West 2 App Service'
+    dependsOn: 'US_WEST_COMMON'
+    environment: 'non-prod' # specify the environment here
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+              displayName: 'Use Terraform latest'
+ 
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform init'
+              inputs:
+                command: 'init'
+                workingDirectory: 'nonprod/westus2/appservice'
+                commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+                backendType: selfConfigured
+                allowTelemetryCollection: false           
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform Apply'
+              inputs:
+                command: 'apply'
+                workingDirectory: 'nonprod/westus2/appservice'
+                environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+                commandOptions: '-auto-approve'
+
+  - deployment: 'US_EAST_COMMON'
+    displayName: 'US EAST Common'
+    environment: 'non-prod' # specify the environment here
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+              displayName: 'Use Terraform latest'
+
+
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform init'
+              inputs:
+                command: 'init'
+                workingDirectory: 'nonprod/eastus/common'
+                commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+                backendType: selfConfigured
+                allowTelemetryCollection: false
+                            
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform Apply'
+              inputs:
+                command: 'apply'
+                workingDirectory: 'nonprod/eastus/common'
+                environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+                commandOptions: '-auto-approve'
+  
+  - deployment: 
+    displayName: 'US EAST App Service'
+    dependsOn: 'US_EAST_COMMON'
+    environment: 'non-prod' # specify the environment here
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@1
+              displayName: 'Use Terraform latest'
+
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform init'
+              inputs:
+                command: 'init'
+                workingDirectory: 'nonprod/eastus/appservice'
+                commandOptions: '-backend-config="access_key=$(tfstate_access_key)'
+                backendType: selfConfigured
+                allowTelemetryCollection: false           
+            - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@1
+              displayName: 'Terraform Apply'
+              inputs:
+                command: 'apply'
+                workingDirectory: 'nonprod/eastus/appservice'
+                environmentServiceNameAzureRM: 'n0-nonprod-deploy'
+                commandOptions: '-auto-approve'
